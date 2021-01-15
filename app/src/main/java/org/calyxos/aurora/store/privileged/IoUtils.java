@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.fdroid.fdroid.privileged;
+package org.calyxos.aurora.store.privileged;
 
 import android.annotation.TargetApi;
 
