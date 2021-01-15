@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.fdroid.fdroid.privileged;
+package org.calyxos.aurora.store.privileged;
 
-import org.fdroid.fdroid.privileged.IPrivilegedCallback;
+import org.calyxos.aurora.store.privileged.IPrivilegedCallback;
 
 interface IPrivilegedService {
 

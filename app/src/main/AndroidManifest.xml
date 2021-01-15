@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.fdroid.fdroid.privileged"
+    package="org.calyxos.aurora.store.privileged"
     android:versionCode="2110"
     android:versionName="0.2.11">
 
@@ -27,10 +27,10 @@
             android:name=".PrivilegedService"
             android:enabled="true"
             android:exported="true"
-            android:process=":fdroid_privileged"
+            android:process=":aurora_store_privileged"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="org.fdroid.fdroid.privileged.IPrivilegedService" />
+                <action android:name="org.calyxos.aurora.store.privileged.IPrivilegedService" />
             </intent-filter>
         </service>
 
