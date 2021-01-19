@@ -37,10 +37,13 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * This service provides an API via AIDL IPC for the main F-Droid app to install/delete packages.
@@ -195,6 +198,40 @@ public class PrivilegedService extends Service {
         }
     }
 
+    private void doSplitPackageStage(List<Uri> uriList) {
+        final PackageManager pm = getPackageManager();
+        final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+        final PackageInstaller packageInstaller = pm.getPackageInstaller();
+        PackageInstaller.Session session = null;
+        try {
+            final int sessionId = packageInstaller.createSession(params);
+            session = packageInstaller.openSession(sessionId);
+            for (Uri uri : uriList) {
+                final File file = new File(uri.getPath());
+                final InputStream inputStream = new FileInputStream(file);
+                final OutputStream outputStream = session.openWrite(file.getName(), 0, file.length());
+                IoUtils.copy(inputStream, outputStream);
+                session.fsync(outputStream);
+                IoUtils.closeQuietly(inputStream);
+                IoUtils.closeQuietly(outputStream);
+            }
+
+            final Intent installIntent = new Intent(BROADCAST_ACTION_INSTALL);
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    sessionId,
+                    installIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            session.commit(pendingIntent.getIntentSender());
+            IoUtils.closeQuietly(session);
+        } catch (IOException e) {
+            Log.e(TAG, "Failure -> %s", e);
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
     private final IPrivilegedService.Stub binder = new IPrivilegedService.Stub() {
         @Override
         public boolean hasPrivilegedPermissions() {
@@ -215,6 +252,17 @@ public class PrivilegedService extends Service {
             } else {
                 installPackageImpl(packageURI, flags, installerPackageName, callback);
             }
+        }
+
+        @Override
+        public void installSplitPackage(List<Uri> uriList, int flags, String installerPackageName,
+                                        IPrivilegedCallback callback) {
+            if (!accessProtectionHelper.isCallerAllowed()) {
+                return;
+            }
+
+            doSplitPackageStage(uriList);
+            mCallback = callback;
         }
 
         @Override
