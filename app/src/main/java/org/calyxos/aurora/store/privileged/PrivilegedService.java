@@ -218,6 +218,17 @@ public class PrivilegedService extends Service {
         }
 
         @Override
+        public void installSplitPackage(List<Uri> uriList, int flags, String installerPackageName,
+                                        IPrivilegedCallback callback) {
+            if (!helper.isCallerAllowed()) {
+                return;
+            }
+
+            doSplitPackageStage(uriList);
+            iPrivilegedCallback = callback;
+        }
+
+        @Override
         public void deletePackage(String packageName, int flags, IPrivilegedCallback callback) {
             if (!accessProtectionHelper.isCallerAllowed()) {
                 return;
