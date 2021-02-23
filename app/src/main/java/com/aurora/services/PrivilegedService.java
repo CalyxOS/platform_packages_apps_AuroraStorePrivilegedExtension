@@ -49,11 +49,11 @@ public class PrivilegedService extends Service {
 
     public static final String TAG = "PrivilegedExtension";
     private static final String BROADCAST_ACTION_INSTALL =
-            "com.aurora.servicesExtension.ACTION_INSTALL_COMMIT";
+            "com.aurora.services.ACTION_INSTALL_COMMIT";
     private static final String BROADCAST_ACTION_UNINSTALL =
-            "com.aurora.servicesExtension.ACTION_UNINSTALL_COMMIT";
+            "com.aurora.services.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
-            "android.permission.INSTALL_PACKAGES";
+            "android.permission.INSTALL_PACKAGE_UPDATES";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
@@ -67,7 +67,7 @@ public class PrivilegedService extends Service {
 
     private boolean hasPrivilegedPermissionsImpl() {
         boolean hasInstallPermission =
-                getPackageManager().checkPermission(Manifest.permission.INSTALL_PACKAGES, getPackageName())
+                getPackageManager().checkPermission(BROADCAST_SENDER_PERMISSION, getPackageName())
                         == PackageManager.PERMISSION_GRANTED;
         boolean hasDeletePermission =
                 getPackageManager().checkPermission(Manifest.permission.DELETE_PACKAGES, getPackageName())
