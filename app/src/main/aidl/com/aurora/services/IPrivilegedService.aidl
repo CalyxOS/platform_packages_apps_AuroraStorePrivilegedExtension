@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.fdroid.fdroid.privileged;
+package com.aurora.services;
 
-import org.fdroid.fdroid.privileged.IPrivilegedCallback;
+import com.aurora.services.IPrivilegedCallback;
 
 interface IPrivilegedService {
 
