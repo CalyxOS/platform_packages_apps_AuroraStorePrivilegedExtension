@@ -37,23 +37,26 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
- * This service provides an API via AIDL IPC for the main F-Droid app to install/delete packages.
+ * This service provides an API via AIDL IPC for the main AuroraStore app to install/delete packages.
  */
 public class PrivilegedService extends Service {
 
     public static final String TAG = "PrivilegedExtension";
     private static final String BROADCAST_ACTION_INSTALL =
-            "com.aurora.servicesExtension.ACTION_INSTALL_COMMIT";
+            "com.aurora.services.ACTION_INSTALL_COMMIT";
     private static final String BROADCAST_ACTION_UNINSTALL =
-            "com.aurora.servicesExtension.ACTION_UNINSTALL_COMMIT";
+            "com.aurora.services.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
-            "android.permission.INSTALL_PACKAGES";
+            "android.permission.INSTALL_PACKAGE_UPDATES";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
@@ -152,12 +155,16 @@ public class PrivilegedService extends Service {
         }
     };
 
+    @TargetApi(24)
+    private void doPackageStage(Uri packageURI) {
+        doSplitPackageStage(List.of(packageURI));
+    }
+
     /**
      * Below function is copied mostly as-is from
      * https://android.googlesource.com/platform/packages/apps/PackageInstaller/+/06163dec5a23bb3f17f7e6279f6d46e1851b7d16
      */
-    @TargetApi(24)
-    private void doPackageStage(Uri packageURI) {
+    private void doSplitPackageStage(List<Uri> uriList) {
         final PackageManager pm = getPackageManager();
         final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
@@ -167,17 +174,19 @@ public class PrivilegedService extends Service {
             final int sessionId = packageInstaller.createSession(params);
             final byte[] buffer = new byte[65536];
             session = packageInstaller.openSession(sessionId);
-            final InputStream in = getContentResolver().openInputStream(packageURI);
-            final OutputStream out = session.openWrite("PackageInstaller", 0, -1 /* sizeBytes, unknown */);
-            try {
-                int c;
-                while ((c = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, c);
+            for (Uri uri : uriList) {
+                final InputStream in = getContentResolver().openInputStream(uri);
+                final OutputStream out = session.openWrite("PackageInstaller", 0, -1 /* sizeBytes, unknown */);
+                try {
+                    int c;
+                    while ((c = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, c);
+                    }
+                    session.fsync(out);
+                } finally {
+                    IoUtils.closeQuietly(in);
+                    IoUtils.closeQuietly(out);
                 }
-                session.fsync(out);
-            } finally {
-                IoUtils.closeQuietly(in);
-                IoUtils.closeQuietly(out);
             }
             // Create a PendingIntent and use it to generate the IntentSender
             Intent broadcastIntent = new Intent(BROADCAST_ACTION_INSTALL);
@@ -203,8 +212,8 @@ public class PrivilegedService extends Service {
         }
 
         @Override
-        public void installPackage(Uri packageURI, int flags, String installerPackageName,
-                                   IPrivilegedCallback callback) {
+        public void installPackage(String packageName, Uri packageURI, int flags,
+                                   String installerPackageName, IPrivilegedCallback callback) {
             if (!accessProtectionHelper.isCallerAllowed()) {
                 return;
             }
@@ -218,6 +227,17 @@ public class PrivilegedService extends Service {
         }
 
         @Override
+        public void installSplitPackage(String packageName, List<Uri> uriList, int flags,
+                                        String installerPackageName, IPrivilegedCallback callback) {
+            if (!accessProtectionHelper.isCallerAllowed()) {
+                return;
+            }
+
+            doSplitPackageStage(uriList);
+            mCallback = callback;
+        }
+
+        @Override
         public void deletePackage(String packageName, int flags, IPrivilegedCallback callback) {
             if (!accessProtectionHelper.isCallerAllowed()) {
                 return;
@@ -227,10 +247,6 @@ public class PrivilegedService extends Service {
                 final PackageManager pm = getPackageManager();
                 final PackageInstaller packageInstaller = pm.getPackageInstaller();
 
-                /*
-                 * The client app used to set this to F-Droid, but we need it to be set to
-                 * this package's package name to be able to uninstall from here.
-                 */
                 pm.setInstallerPackageName(packageName, getPackageName());
                 // Create a PendingIntent and use it to generate the IntentSender
                 Intent broadcastIntent = new Intent(BROADCAST_ACTION_UNINSTALL);
