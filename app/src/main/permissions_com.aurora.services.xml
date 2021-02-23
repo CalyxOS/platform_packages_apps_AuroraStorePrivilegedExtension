@@ -2,6 +2,6 @@
 <permissions>
     <privapp-permissions package="com.aurora.services">
         <permission name="android.permission.DELETE_PACKAGES"/>
-        <permission name="android.permission.INSTALL_PACKAGES"/>
+        <permission name="android.permission.INSTALL_PACKAGE_UPDATES"/>
     </privapp-permissions>
 </permissions>

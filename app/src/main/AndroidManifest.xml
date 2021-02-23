@@ -11,7 +11,7 @@
 
     <!-- These permissions are only granted when this apk is installed as a privileged app! -->
     <uses-permission
-        android:name="android.permission.INSTALL_PACKAGES"
+        android:name="android.permission.INSTALL_PACKAGE_UPDATES"
         tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.DELETE_PACKAGES"
