@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.fdroid.fdroid.privileged;
+package com.aurora.services;
 
 import android.annotation.TargetApi;
 
