@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.fdroid.fdroid.privileged;
+package com.aurora.services;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -49,9 +49,9 @@ public class PrivilegedService extends Service {
 
     public static final String TAG = "PrivilegedExtension";
     private static final String BROADCAST_ACTION_INSTALL =
-            "org.fdroid.fdroid.PrivilegedExtension.ACTION_INSTALL_COMMIT";
+            "com.aurora.servicesExtension.ACTION_INSTALL_COMMIT";
     private static final String BROADCAST_ACTION_UNINSTALL =
-            "org.fdroid.fdroid.PrivilegedExtension.ACTION_UNINSTALL_COMMIT";
+            "com.aurora.servicesExtension.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
             "android.permission.INSTALL_PACKAGES";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
