@@ -22,6 +22,14 @@ interface IPrivilegedService {
 
     boolean hasPrivilegedPermissions();
 
+    oneway void installPackage(
+        in String packageName,
+        in Uri uri,
+        in int flags,
+        in String installerPackageName,
+        in IPrivilegedCallback callback
+    );
+
     /**
      * - Docs based on PackageManager.installPackage()
      * - Asynchronous (oneway) IPC calls!
@@ -40,9 +48,13 @@ interface IPrivilegedService {
      * @param callback An callback to get notified when the package installation is
      * complete.
      */
-    oneway void installPackage(in Uri packageURI, in int flags, in String installerPackageName,
-                        in IPrivilegedCallback callback);
-
+    oneway void installSplitPackage(
+        in String packageName,
+        in List<Uri> uriList,
+        in int flags,
+        in String installerPackageName,
+        in IPrivilegedCallback callback
+    );
 
     /**
      * - Docs based on PackageManager.deletePackage()
@@ -58,6 +70,10 @@ interface IPrivilegedService {
      * @param callback An callback to get notified when the package deletion is
      * complete.
      */
-    oneway void deletePackage(in String packageName, in int flags, in IPrivilegedCallback callback);
+    oneway void deletePackage(
+        in String packageName,
+        in int flags,
+        in IPrivilegedCallback callback
+    );
 
 }
