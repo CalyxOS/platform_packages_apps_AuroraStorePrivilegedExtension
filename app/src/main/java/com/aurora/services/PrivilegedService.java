@@ -56,7 +56,7 @@ public class PrivilegedService extends Service {
     private static final String BROADCAST_ACTION_UNINSTALL =
             "com.aurora.services.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
-            "android.permission.INSTALL_PACKAGES";
+            "android.permission.INSTALL_PACKAGE_UPDATES";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
