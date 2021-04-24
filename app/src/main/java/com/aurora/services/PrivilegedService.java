@@ -61,9 +61,6 @@ public class PrivilegedService extends Service {
 
     private AccessProtectionHelper accessProtectionHelper;
 
-    private Method installMethod;
-    private Method deleteMethod;
-
     private IPrivilegedCallback mCallback;
 
     Context context = this;
@@ -79,86 +76,24 @@ public class PrivilegedService extends Service {
         return hasInstallPermission && hasDeletePermission;
     }
 
-    private void installPackageImpl(Uri packageURI, int flags, String installerPackageName,
-                                    final IPrivilegedCallback callback) {
-        // Internal callback from the system
-        IPackageInstallObserver.Stub installObserver = new IPackageInstallObserver.Stub() {
-            @Override
-            public void packageInstalled(String packageName, int returnCode) throws RemoteException {
-                // forward this internal callback to our callback
-                try {
-                    callback.handleResult(packageName, returnCode);
-                } catch (RemoteException e1) {
-                    Log.e(TAG, "RemoteException", e1);
-                }
-            }
-        };
-
-        // execute internal method
-        try {
-            installMethod.invoke(getPackageManager(), packageURI, installObserver,
-                    flags, installerPackageName);
-        } catch (Exception e) {
-            Log.e(TAG, "Android not compatible!", e);
-            try {
-                callback.handleResult(null, 0);
-            } catch (RemoteException e1) {
-                Log.e(TAG, "RemoteException", e1);
-            }
-        }
-    }
-
-    private void deletePackageImpl(String packageName, int flags, final IPrivilegedCallback callback) {
-        if (isDeviceOwner(packageName)) {
-            Log.e(TAG, "Cannot delete " + packageName + ". This app is the device owner.");
-            return;
-        }
-
-        // Internal callback from the system
-        IPackageDeleteObserver.Stub deleteObserver = new IPackageDeleteObserver.Stub() {
-            @Override
-            public void packageDeleted(String packageName, int returnCode) throws RemoteException {
-                // forward this internal callback to our callback
-                try {
-                    callback.handleResult(packageName, returnCode);
-                } catch (RemoteException e1) {
-                    Log.e(TAG, "RemoteException", e1);
-                }
-            }
-        };
-
-        // execute internal method
-        try {
-            deleteMethod.invoke(getPackageManager(), packageName, deleteObserver, flags);
-        } catch (Exception e) {
-            Log.e(TAG, "Android not compatible!", e);
-            try {
-                callback.handleResult(null, 0);
-            } catch (RemoteException e1) {
-                Log.e(TAG, "RemoteException", e1);
-            }
-        }
-    }
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final int returnCode = intent.getIntExtra(
-                    EXTRA_LEGACY_STATUS, PackageInstaller.STATUS_FAILURE);
-            final String packageName = intent.getStringExtra(
-                    PackageInstaller.EXTRA_PACKAGE_NAME);
-            try {
-                mCallback.handleResult(packageName, returnCode);
-            } catch (RemoteException e1) {
-                Log.e(TAG, "RemoteException", e1);
+            final int returnCode = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_FAILURE);
+            if (returnCode == PackageInstaller.STATUS_PENDING_USER_ACTION) {
+                context.startActivity((Intent)intent.getParcelableExtra(Intent.EXTRA_INTENT));
+            } else {
+                final String packageName = intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME);
+                final String extra = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
+                try {
+                    mCallback.handleResultX(packageName, returnCode, extra);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException", e);
+                }
             }
         }
     };
-
-    @TargetApi(24)
-    private void doPackageStage(Uri packageURI) {
-        doSplitPackageStage(List.of(packageURI));
-    }
 
     /**
      * Below function is copied mostly as-is from
@@ -212,37 +147,47 @@ public class PrivilegedService extends Service {
         }
 
         @Override
-        public void installPackage(String packageName, Uri packageURI, int flags,
-                                   String installerPackageName, IPrivilegedCallback callback) {
-            if (!accessProtectionHelper.isCallerAllowed()) {
-                return;
-            }
+        public void installPackage(Uri packageURI, int flags, String installerPackageName,
+                                   IPrivilegedCallback callback) {
 
-            if (Build.VERSION.SDK_INT >= 24) {
-                doPackageStage(packageURI);
-                mCallback = callback;
-            } else {
-                installPackageImpl(packageURI, flags, installerPackageName, callback);
-            }
         }
 
         @Override
-        public void installSplitPackage(String packageName, List<Uri> uriList, int flags,
-                                        String installerPackageName, IPrivilegedCallback callback) {
-            if (!accessProtectionHelper.isCallerAllowed()) {
-                return;
-            }
+        public void installSplitPackage(List<Uri> listURI, int flags, String installerPackageName,
+                                        IPrivilegedCallback callback) {
 
-            doSplitPackageStage(uriList);
-            mCallback = callback;
+        }
+
+        @Override
+        public void installPackageX(String packageName, Uri packageURI, int flags,
+                                    String installerPackageName, IPrivilegedCallback callback) {
+            installSplitPackageX(packageName, List.of(packageURI), flags, installerPackageName, callback);
+        }
+
+        @Override
+        public void installSplitPackageX(String packageName, List<Uri> uriList, int flags,
+                                         String installerPackageName, IPrivilegedCallback callback) {
+            if (accessProtectionHelper.isCallerAllowed()) {
+                doSplitPackageStage(uriList);
+                mCallback = callback;
+            } else {
+                try {
+                    callback.handleResultX(packageName, 1, "Installer not allowed");
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException", e);
+                }
+            }
         }
 
         @Override
         public void deletePackage(String packageName, int flags, IPrivilegedCallback callback) {
-            if (!accessProtectionHelper.isCallerAllowed()) {
-                return;
-            }
-            if (Build.VERSION.SDK_INT >= 24) {
+            deletePackageX(packageName, flags, "", callback);
+        }
+
+        @Override
+        public void deletePackageX(String packageName, int flags,
+                                   String installerPackageName, IPrivilegedCallback callback) {
+            if (accessProtectionHelper.isCallerAllowed()) {
                 mCallback = callback;
                 final PackageManager pm = getPackageManager();
                 final PackageInstaller packageInstaller = pm.getPackageInstaller();
@@ -257,7 +202,11 @@ public class PrivilegedService extends Service {
                         PendingIntent.FLAG_UPDATE_CURRENT);
                 packageInstaller.uninstall(packageName, pendingIntent.getIntentSender());
             } else {
-                deletePackageImpl(packageName, flags, callback);
+                try {
+                    callback.handleResultX(packageName, -1, "Un-installer not allowed");
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException", e);
+                }
             }
         }
     };
@@ -272,26 +221,6 @@ public class PrivilegedService extends Service {
         super.onCreate();
 
         accessProtectionHelper = new AccessProtectionHelper(this);
-        if (Build.VERSION.SDK_INT < 24) {
-            // get internal methods via reflection
-            try {
-                Class<?>[] installTypes = {
-                        Uri.class, IPackageInstallObserver.class, int.class,
-                        String.class,
-                };
-                Class<?>[] deleteTypes = {
-                        String.class, IPackageDeleteObserver.class,
-                        int.class,
-                };
-
-                PackageManager pm = getPackageManager();
-                installMethod = pm.getClass().getMethod("installPackage", installTypes);
-                deleteMethod = pm.getClass().getMethod("deletePackage", deleteTypes);
-            } catch (NoSuchMethodException e) {
-                Log.e(TAG, "Android not compatible!", e);
-                stopSelf();
-            }
-        }
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BROADCAST_ACTION_INSTALL);
@@ -301,22 +230,6 @@ public class PrivilegedService extends Service {
         intentFilter2.addAction(BROADCAST_ACTION_UNINSTALL);
         registerReceiver(
                 mBroadcastReceiver, intentFilter2, BROADCAST_SENDER_PERMISSION, null /*scheduler*/);
-    }
-
-    /**
-     * Checks if an app is the current device owner.
-     *
-     * @param packageName to check
-     * @return true if it is the device owner app
-     */
-    private boolean isDeviceOwner(String packageName) {
-        if (Build.VERSION.SDK_INT < 18) {
-            return false;
-        }
-
-        DevicePolicyManager manager =
-                (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return manager.isDeviceOwnerApp(packageName);
     }
 
     @Override
