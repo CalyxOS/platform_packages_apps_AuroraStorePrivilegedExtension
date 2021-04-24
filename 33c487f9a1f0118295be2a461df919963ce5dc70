@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6163b8b8_46b3d499",
+        "filename": "app/src/main/aidl/com/aurora/services/IPrivilegedService.aidl",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-04-24T01:19:25Z",
+      "side": 0,
+      "message": "I was matching aurora services. the next change in the chain has more of these functions. I can add the comments back on top of these particular versions if wanted",
+      "parentUuid": "0904c123_8c05cf32",
+      "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "28ea92dc_48481a78",
         "filename": "app/src/main/java/com/aurora/services/PrivilegedService.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2021-04-24T01:11:49Z",
       "side": 0,
       "message": "Keep this too, unnecessary removal.",
+      "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ec48d2d_936a435e",
+        "filename": "app/src/main/java/com/aurora/services/PrivilegedService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-04-24T01:19:25Z",
+      "side": 0,
+      "message": "remove the first part then? the f-droid part is not relevant",
+      "parentUuid": "28ea92dc_48481a78",
       "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
       "serverId": "35266860-6252-469c-a67d-185064479fc0",
       "unresolved": true
