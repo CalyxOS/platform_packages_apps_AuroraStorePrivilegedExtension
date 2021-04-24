@@ -16,6 +16,24 @@
       "revId": "3a5809e05a129d2f0a180e9f57b1bb278c232484",
       "serverId": "35266860-6252-469c-a67d-185064479fc0",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2f5d4c6_1ddb444d",
+        "filename": "app/src/main/aidl/com/aurora/services/IPrivilegedService.aidl",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-04-24T01:20:37Z",
+      "side": 1,
+      "message": "it is not but the AIDL will not work without these entries or if in different order",
+      "parentUuid": "e427b733_c43dfc34",
+      "revId": "3a5809e05a129d2f0a180e9f57b1bb278c232484",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
     }
   ]
 }
