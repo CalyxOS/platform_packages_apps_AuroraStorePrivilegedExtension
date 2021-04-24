@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e427b733_c43dfc34",
+        "filename": "app/src/main/aidl/com/aurora/services/IPrivilegedService.aidl",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-04-24T01:17:57Z",
+      "side": 1,
+      "message": "Is this used by Aurora Store?",
+      "revId": "3a5809e05a129d2f0a180e9f57b1bb278c232484",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    }
+  ]
+}
