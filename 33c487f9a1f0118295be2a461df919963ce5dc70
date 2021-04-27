@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "f78409c3_8c5abdd7",
+        "filename": "app/src/main/aidl/com/aurora/services/IPrivilegedService.aidl",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-04-27T01:41:54Z",
+      "side": 0,
+      "message": "Yeah please do, it\u0027s just nice to have them.",
+      "parentUuid": "6163b8b8_46b3d499",
+      "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "28ea92dc_48481a78",
         "filename": "app/src/main/java/com/aurora/services/PrivilegedService.java",
         "patchSetId": 8
@@ -66,6 +84,24 @@
       "side": 0,
       "message": "remove the first part then? the f-droid part is not relevant",
       "parentUuid": "28ea92dc_48481a78",
+      "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e017966_fc756803",
+        "filename": "app/src/main/java/com/aurora/services/PrivilegedService.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-04-27T01:41:54Z",
+      "side": 0,
+      "message": "s/F-Droid/Aurora/",
+      "parentUuid": "6ec48d2d_936a435e",
       "revId": "33c487f9a1f0118295be2a461df919963ce5dc70",
       "serverId": "35266860-6252-469c-a67d-185064479fc0",
       "unresolved": true
