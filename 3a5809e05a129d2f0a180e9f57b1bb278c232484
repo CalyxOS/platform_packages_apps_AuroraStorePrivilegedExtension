@@ -34,6 +34,24 @@
       "revId": "3a5809e05a129d2f0a180e9f57b1bb278c232484",
       "serverId": "35266860-6252-469c-a67d-185064479fc0",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "215f6c61_d7b05dce",
+        "filename": "app/src/main/aidl/com/aurora/services/IPrivilegedService.aidl",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-03T18:37:58Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c2f5d4c6_1ddb444d",
+      "revId": "3a5809e05a129d2f0a180e9f57b1bb278c232484",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0",
+      "unresolved": false
     }
   ]
 }
