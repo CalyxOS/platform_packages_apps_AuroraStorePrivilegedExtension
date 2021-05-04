@@ -88,8 +88,8 @@ public class PrivilegedService extends Service {
                 final String extra = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
                 try {
                     mCallback.handleResultX(packageName, returnCode, extra);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException", e);
+                } catch (Exception e) {
+                    Log.e(TAG, packageName + " " + extra, e);
                 }
             }
         }
@@ -99,7 +99,7 @@ public class PrivilegedService extends Service {
      * Below function is copied mostly as-is from
      * https://android.googlesource.com/platform/packages/apps/PackageInstaller/+/06163dec5a23bb3f17f7e6279f6d46e1851b7d16
      */
-    private void doSplitPackageStage(List<Uri> uriList) {
+    private void doSplitPackageStage(String packageName, List<Uri> uriList) {
         final PackageManager pm = getPackageManager();
         final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
@@ -109,9 +109,10 @@ public class PrivilegedService extends Service {
             final int sessionId = packageInstaller.createSession(params);
             final byte[] buffer = new byte[65536];
             session = packageInstaller.openSession(sessionId);
+            int apkId = -1;
             for (Uri uri : uriList) {
                 final InputStream in = getContentResolver().openInputStream(uri);
-                final OutputStream out = session.openWrite("PackageInstaller", 0, -1 /* sizeBytes, unknown */);
+                final OutputStream out = session.openWrite(packageName + "_" + ++apkId, 0, -1 /* sizeBytes, unknown */);
                 try {
                     int c;
                     while ((c = in.read(buffer)) != -1) {
@@ -168,7 +169,7 @@ public class PrivilegedService extends Service {
         public void installSplitPackageX(String packageName, List<Uri> uriList, int flags,
                                          String installerPackageName, IPrivilegedCallback callback) {
             if (accessProtectionHelper.isCallerAllowed()) {
-                doSplitPackageStage(uriList);
+                doSplitPackageStage(packageName, uriList);
                 mCallback = callback;
             } else {
                 try {
