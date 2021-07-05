@@ -188,29 +188,10 @@ public class PrivilegedService extends Service {
         @Override
         public void deletePackageX(String packageName, int flags,
                                    String installerPackageName, IPrivilegedCallback callback) {
-            if (accessProtectionHelper.isCallerAllowed()) {
-                mCallback = callback;
-                final PackageManager pm = getPackageManager();
-                final PackageInstaller packageInstaller = pm.getPackageInstaller();
-
-                /*
-                 * We need the installer to be set to this package to be able to uninstall from here
-                 */
-                pm.setInstallerPackageName(packageName, getPackageName());
-                // Create a PendingIntent and use it to generate the IntentSender
-                Intent broadcastIntent = new Intent(BROADCAST_ACTION_UNINSTALL);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                        context, // context
-                        0, // arbitary
-                        broadcastIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-                packageInstaller.uninstall(packageName, pendingIntent.getIntentSender());
-            } else {
-                try {
-                    callback.handleResultX(packageName, -1, "Un-installer not allowed");
-                } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException", e);
-                }
+            try {
+                callback.handleResultX(packageName, -1, "Un-installer not allowed");
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException", e);
             }
         }
     };
