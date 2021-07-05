@@ -13,9 +13,6 @@
     <uses-permission
         android:name="android.permission.INSTALL_PACKAGE_UPDATES"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission
-        android:name="android.permission.DELETE_PACKAGES"
-        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="false"
