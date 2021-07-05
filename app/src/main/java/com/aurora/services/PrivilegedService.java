@@ -17,32 +17,23 @@
 
 package com.aurora.services;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -60,20 +51,15 @@ public class PrivilegedService extends Service {
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
+    private PackageInstaller packageInstaller;
 
     private IPrivilegedCallback mCallback;
 
     Context context = this;
 
     private boolean hasPrivilegedPermissionsImpl() {
-        boolean hasInstallPermission =
-                getPackageManager().checkPermission(BROADCAST_SENDER_PERMISSION, getPackageName())
-                        == PackageManager.PERMISSION_GRANTED;
-        boolean hasDeletePermission =
-                getPackageManager().checkPermission(Manifest.permission.DELETE_PACKAGES, getPackageName())
-                        == PackageManager.PERMISSION_GRANTED;
-
-        return hasInstallPermission && hasDeletePermission;
+        return getPackageManager().checkPermission(BROADCAST_SENDER_PERMISSION, getPackageName())
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -100,10 +86,8 @@ public class PrivilegedService extends Service {
      * https://android.googlesource.com/platform/packages/apps/PackageInstaller/+/06163dec5a23bb3f17f7e6279f6d46e1851b7d16
      */
     private void doSplitPackageStage(String packageName, List<Uri> uriList) {
-        final PackageManager pm = getPackageManager();
         final PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        final PackageInstaller packageInstaller = pm.getPackageInstaller();
         PackageInstaller.Session session = null;
         try {
             final int sessionId = packageInstaller.createSession(params);
@@ -189,25 +173,14 @@ public class PrivilegedService extends Service {
         public void deletePackageX(String packageName, int flags,
                                    String installerPackageName, IPrivilegedCallback callback) {
             if (accessProtectionHelper.isCallerAllowed()) {
+                packageInstaller.uninstall(packageName, PendingIntent.getBroadcast(
+                        PrivilegedService.this, 0,
+                        new Intent(BROADCAST_ACTION_UNINSTALL), PendingIntent.FLAG_UPDATE_CURRENT)
+                        .getIntentSender());
                 mCallback = callback;
-                final PackageManager pm = getPackageManager();
-                final PackageInstaller packageInstaller = pm.getPackageInstaller();
-
-                /*
-                 * We need the installer to be set to this package to be able to uninstall from here
-                 */
-                pm.setInstallerPackageName(packageName, getPackageName());
-                // Create a PendingIntent and use it to generate the IntentSender
-                Intent broadcastIntent = new Intent(BROADCAST_ACTION_UNINSTALL);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                        context, // context
-                        0, // arbitary
-                        broadcastIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-                packageInstaller.uninstall(packageName, pendingIntent.getIntentSender());
             } else {
                 try {
-                    callback.handleResultX(packageName, -1, "Un-installer not allowed");
+                    callback.handleResultX(packageName, 1, "Uninstaller not allowed");
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException", e);
                 }
@@ -225,15 +198,13 @@ public class PrivilegedService extends Service {
         super.onCreate();
 
         accessProtectionHelper = new AccessProtectionHelper(this);
+        packageInstaller = getPackageManager().getPackageInstaller();
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BROADCAST_ACTION_INSTALL);
+        intentFilter.addAction(BROADCAST_ACTION_UNINSTALL);
         registerReceiver(
                 mBroadcastReceiver, intentFilter, BROADCAST_SENDER_PERMISSION, null /*scheduler*/);
-        IntentFilter intentFilter2 = new IntentFilter();
-        intentFilter2.addAction(BROADCAST_ACTION_UNINSTALL);
-        registerReceiver(
-                mBroadcastReceiver, intentFilter2, BROADCAST_SENDER_PERMISSION, null /*scheduler*/);
     }
 
     @Override
