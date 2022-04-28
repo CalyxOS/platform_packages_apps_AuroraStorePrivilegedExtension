@@ -47,7 +47,7 @@ public class PrivilegedService extends Service {
     private static final String BROADCAST_ACTION_UNINSTALL =
             "com.aurora.services.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
-            "android.permission.INSTALL_PACKAGE_UPDATES";
+            "com.aurora.services.BROADCAST_SENDER_PERMISSION";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
@@ -57,18 +57,15 @@ public class PrivilegedService extends Service {
 
     Context context = this;
 
-    private boolean hasPrivilegedPermissionsImpl() {
-        return getPackageManager().checkPermission(BROADCAST_SENDER_PERMISSION, getPackageName())
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final int returnCode = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_FAILURE);
             if (returnCode == PackageInstaller.STATUS_PENDING_USER_ACTION) {
-                context.startActivity(intent.getParcelableExtra(Intent.EXTRA_INTENT));
+                Intent intent2 = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+                intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent2);
             } else {
                 final String packageName = intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME);
                 final String extra = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
@@ -108,13 +105,14 @@ public class PrivilegedService extends Service {
                     IoUtils.closeQuietly(out);
                 }
             }
+            params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED);
             // Create a PendingIntent and use it to generate the IntentSender
             Intent broadcastIntent = new Intent(BROADCAST_ACTION_INSTALL);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     this /*context*/,
                     sessionId,
                     broadcastIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             session.commit(pendingIntent.getIntentSender());
         } catch (IOException e) {
             Log.d(TAG, "Failure", e);
@@ -127,8 +125,7 @@ public class PrivilegedService extends Service {
     private final IPrivilegedService.Stub binder = new IPrivilegedService.Stub() {
         @Override
         public boolean hasPrivilegedPermissions() {
-            boolean callerIsAllowed = accessProtectionHelper.isCallerAllowed();
-            return callerIsAllowed && hasPrivilegedPermissionsImpl();
+            return accessProtectionHelper.isCallerAllowed();
         }
 
         @Override
