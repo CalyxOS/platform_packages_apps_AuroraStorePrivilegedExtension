@@ -47,7 +47,7 @@ public class PrivilegedService extends Service {
     private static final String BROADCAST_ACTION_UNINSTALL =
             "com.aurora.services.ACTION_UNINSTALL_COMMIT";
     private static final String BROADCAST_SENDER_PERMISSION =
-            "android.permission.INSTALL_PACKAGE_UPDATES";
+            "com.aurora.services.BROADCAST_SENDER_PERMISSION";
     private static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
 
     private AccessProtectionHelper accessProtectionHelper;
@@ -56,11 +56,6 @@ public class PrivilegedService extends Service {
     private IPrivilegedCallback mCallback;
 
     Context context = this;
-
-    private boolean hasPrivilegedPermissionsImpl() {
-        return getPackageManager().checkPermission(BROADCAST_SENDER_PERMISSION, getPackageName())
-                == PackageManager.PERMISSION_GRANTED;
-    }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -108,13 +103,14 @@ public class PrivilegedService extends Service {
                     IoUtils.closeQuietly(out);
                 }
             }
+            params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED);
             // Create a PendingIntent and use it to generate the IntentSender
             Intent broadcastIntent = new Intent(BROADCAST_ACTION_INSTALL);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     this /*context*/,
                     sessionId,
                     broadcastIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             session.commit(pendingIntent.getIntentSender());
         } catch (IOException e) {
             Log.d(TAG, "Failure", e);
@@ -127,8 +123,7 @@ public class PrivilegedService extends Service {
     private final IPrivilegedService.Stub binder = new IPrivilegedService.Stub() {
         @Override
         public boolean hasPrivilegedPermissions() {
-            boolean callerIsAllowed = accessProtectionHelper.isCallerAllowed();
-            return callerIsAllowed && hasPrivilegedPermissionsImpl();
+            return accessProtectionHelper.isCallerAllowed();
         }
 
         @Override
