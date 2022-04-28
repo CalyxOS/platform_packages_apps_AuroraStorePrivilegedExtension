@@ -108,6 +108,7 @@ public class PrivilegedService extends Service {
                     IoUtils.closeQuietly(out);
                 }
             }
+            params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED);
             // Create a PendingIntent and use it to generate the IntentSender
             Intent broadcastIntent = new Intent(BROADCAST_ACTION_INSTALL);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
