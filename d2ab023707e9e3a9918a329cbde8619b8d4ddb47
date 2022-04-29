@@ -16,6 +16,24 @@
       "message": "It gets to here since the extra is null.",
       "revId": "d2ab023707e9e3a9918a329cbde8619b8d4ddb47",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1cfa62a6_772d3fea",
+        "filename": "app/src/main/java/com/aurora/services/PrivilegedService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-29T00:55:51Z",
+      "side": 1,
+      "message": "D\u0027oh, fixed.",
+      "parentUuid": "70676951_a6321bdd",
+      "revId": "d2ab023707e9e3a9918a329cbde8619b8d4ddb47",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

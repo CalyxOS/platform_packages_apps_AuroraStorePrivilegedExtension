@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f275696_e20e80ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-29T00:55:51Z",
+      "side": 1,
+      "message": "Now installs and uninstalls work (asking for confirmation), but updates are also asking for confirmation, which is not what we want.",
+      "revId": "a8cc49db97852f5786273c8a141138be5720e0f9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
