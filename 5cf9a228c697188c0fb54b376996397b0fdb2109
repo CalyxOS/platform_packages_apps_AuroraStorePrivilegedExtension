@@ -16,6 +16,23 @@
       "message": "Works!",
       "revId": "5cf9a228c697188c0fb54b376996397b0fdb2109",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48a5fe0c_e3ace3b5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-29T01:47:48Z",
+      "side": 1,
+      "message": "Aurora does target 31, but the only reason we need this is if we drop services in a build the store just fails, it doesn\u0027t fallback to a working installer\n\nThus to have a seamless user experience, this.\n\nAnd it\u0027s more useful for f-droid where target sdk is 25",
+      "revId": "5cf9a228c697188c0fb54b376996397b0fdb2109",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
