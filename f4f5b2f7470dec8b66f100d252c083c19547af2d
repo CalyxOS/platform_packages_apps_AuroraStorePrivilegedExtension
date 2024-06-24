@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e7c4e6a_8fe09abb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-06-24T13:05:46Z",
+      "side": 1,
+      "message": "I\u0027d have suggested s/F-Droid/Aurora/ but then I noticed that it\u0027s translated in some languages, so this fine.",
+      "revId": "f4f5b2f7470dec8b66f100d252c083c19547af2d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
