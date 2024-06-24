@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c245cb15_059f054f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-06-24T13:06:37Z",
+      "side": 1,
+      "message": "Let\u0027s not add one-off translations like this, we ensure all translations go through Weblate.\n\nGiven that this is deprecated though, not worth setting it up for this.",
+      "revId": "7da0b3272646762acc578e282393224c1709e890",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
